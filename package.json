@@ -1,0 +1,7 @@
+{
+  "name": "ai-customer-ops-workflow",
+  "private": true,
+  "scripts": {
+    "eval": "node evaluations/run.mjs"
+  }
+}

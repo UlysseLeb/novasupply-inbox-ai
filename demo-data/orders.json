@@ -1,0 +1,88 @@
+[
+  {
+    "order_number": "CMD-2045",
+    "client_id": "CLI-001",
+    "status": "livrée",
+    "ordered_products": [
+      { "reference": "CAP-100", "quantity": 10 },
+      { "reference": "MOD-220", "quantity": 5 }
+    ],
+    "shipped_products": [
+      { "reference": "CAP-100", "quantity": 8 },
+      { "reference": "MOD-220", "quantity": 5 }
+    ]
+  },
+  {
+    "order_number": "CMD-3012",
+    "client_id": "CLI-002",
+    "status": "livrée",
+    "ordered_products": [
+      { "reference": "MOD-220", "quantity": 4 }
+    ],
+    "shipped_products": [
+      { "reference": "MOD-110", "quantity": 4 }
+    ]
+  },
+  {
+    "order_number": "CMD-2890",
+    "client_id": "CLI-003",
+    "status": "livrée",
+    "ordered_products": [
+      { "reference": "VAL-300", "quantity": 2 }
+    ],
+    "shipped_products": [
+      { "reference": "VAL-300", "quantity": 2 }
+    ]
+  },
+  {
+    "order_number": "CMD-1001",
+    "client_id": "CLI-004",
+    "status": "livrée",
+    "ordered_products": [
+      { "reference": "CAB-050", "quantity": 100 }
+    ],
+    "shipped_products": [
+      { "reference": "CAB-050", "quantity": 100 }
+    ]
+  },
+  {
+    "order_number": "CMD-1002",
+    "client_id": "CLI-005",
+    "status": "livrée",
+    "ordered_products": [
+      { "reference": "CAP-100", "quantity": 5 }
+    ],
+    "shipped_products": [
+      { "reference": "CAP-100", "quantity": 5 }
+    ]
+  },
+  {
+    "order_number": "CMD-1003",
+    "client_id": "CLI-001",
+    "status": "en cours",
+    "ordered_products": [
+      { "reference": "VAL-300", "quantity": 1 }
+    ],
+    "shipped_products": []
+  },
+  {
+    "order_number": "CMD-1004",
+    "client_id": "CLI-002",
+    "status": "livrée",
+    "ordered_products": [
+      { "reference": "MOD-220", "quantity": 10 }
+    ],
+    "shipped_products": [
+      { "reference": "MOD-220", "quantity": 10 }
+    ]
+  },
+  {
+    "order_number": "CMD-1005",
+    "client_id": "CLI-003",
+    "status": "en préparation",
+    "ordered_products": [
+      { "reference": "CAB-050", "quantity": 50 }
+    ],
+    "shipped_products": []
+  }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "invoice_number": "FAC-552",
+    "order_number": "CMD-1004",
+    "client_id": "CLI-002",
+    "quoted_amount": 980.0,
+    "billed_amount": 1280.0
+  },
+  {
+    "invoice_number": "FAC-601",
+    "order_number": "CMD-2890",
+    "client_id": "CLI-003",
+    "quoted_amount": 240.0,
+    "billed_amount": 240.0
+  },
+  {
+    "invoice_number": "FAC-602",
+    "order_number": "CMD-2890",
+    "client_id": "CLI-003",
+    "quoted_amount": 240.0,
+    "billed_amount": 240.0
+  }
+]

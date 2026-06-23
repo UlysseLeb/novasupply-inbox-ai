@@ -1,0 +1,7 @@
+[
+  { "reference": "CAP-100", "name": "Capteur de pression CAP-100", "unit_price": 42.5 },
+  { "reference": "MOD-220", "name": "Module électronique MOD-220", "unit_price": 78.0 },
+  { "reference": "MOD-110", "name": "Module électronique MOD-110", "unit_price": 65.0 },
+  { "reference": "VAL-300", "name": "Vanne industrielle VAL-300", "unit_price": 120.0 },
+  { "reference": "CAB-050", "name": "Câble blindé CAB-050", "unit_price": 8.2 }
+]
