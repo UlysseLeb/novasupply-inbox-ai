@@ -1,6 +1,6 @@
 // POST /api/classify-ticket
 // Rôle : lire un email client et décider quoi en faire.
-// Entrée : { email_text, sender_email? }
+// Entrée : { email_subject?, email_text, sender_email? }
 // Sortie : { category, priority, complexity_level (1/2/3), sentiment, automatic_reply_allowed, confidence }
 // C'est la toute première étape du workflow : avant même de chercher des infos
 // ou de rédiger une réponse, on détermine le niveau de traitement nécessaire.
@@ -47,7 +47,7 @@ automatic_reply_allowed est true UNIQUEMENT si complexity_level est 1 ET sentime
 confidence est ta confiance (0 à 1) dans cette classification.`;
 
 export async function POST(request: NextRequest) {
-  const { email_text, sender_email } = await request.json();
+  const { email_subject, email_text, sender_email } = await request.json();
 
   // email_text est la seule donnée vraiment indispensable : sans texte, pas de classification possible.
   if (!email_text) {
@@ -67,7 +67,9 @@ export async function POST(request: NextRequest) {
     messages: [
       {
         role: "user",
-        content: `Email de : ${sender_email ?? "expéditeur inconnu"}\n\n${email_text}`,
+        // L'objet du mail donne souvent un indice rapide sur l'urgence/le sujet
+        // avant même de lire le corps (ex. "Mise en demeure" vs "Horaires d'ouverture").
+        content: `Email de : ${sender_email ?? "expéditeur inconnu"}\nObjet : ${email_subject ?? "(sans objet)"}\n\n${email_text}`,
       },
     ],
   });

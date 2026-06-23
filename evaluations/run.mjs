@@ -16,11 +16,11 @@ function deriveAction(complexity_level, automatic_reply_allowed) {
   return "draft_for_approval";
 }
 
-async function classify(email_text) {
+async function classify(email_subject, email_text) {
   const response = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email_text }),
+    body: JSON.stringify({ email_subject, email_text }),
   });
   if (!response.ok) {
     throw new Error(`API a répondu ${response.status}`);
@@ -39,7 +39,7 @@ async function main() {
   // On traite les cas un par un (pas en parallèle) pour rester simple
   // et éviter de cogner les limites de débit de l'API sur un petit volume comme celui-ci.
   for (const ticket of tickets) {
-    const classification = await classify(ticket.email);
+    const classification = await classify(ticket.email_subject, ticket.email);
     const predictedAction = deriveAction(
       classification.complexity_level,
       classification.automatic_reply_allowed,
