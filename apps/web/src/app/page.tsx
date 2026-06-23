@@ -167,8 +167,11 @@ export default function Home() {
   return (
     <div className={styles.layout}>
       <aside className={styles.inbox}>
-        <h1 className={styles.inboxTitle}>NovaSupply — Boîte de réception</h1>
-        <Link href="/dashboard" className={styles.dashboardLink}>Voir le tableau de bord ROI →</Link>
+        <div className={styles.inboxHeader}>
+          <h1 className={styles.inboxTitle}>NovaSupply</h1>
+          <p className={styles.inboxSubtitle}>Boîte de réception — {tickets.length} emails</p>
+          <Link href="/dashboard" className={styles.dashboardLink}>📊 Tableau de bord ROI</Link>
+        </div>
         <ul className={styles.ticketList}>
           {tickets.map((ticket) => (
             <li key={ticket.id}>
@@ -204,24 +207,32 @@ export default function Home() {
             {classification && (
               <section className={styles.card}>
                 <h3>Classification</h3>
-                <p>
-                  Catégorie : <strong>{classification.category}</strong> · Priorité : {classification.priority} ·
-                  Niveau : {classification.complexity_level} · Sentiment : {classification.sentiment}
-                </p>
-                <p>Confiance : {Math.round(classification.confidence * 100)}%</p>
+                <div className={styles.badgeRow}>
+                  <LevelBadge level={classification.complexity_level} />
+                  <span className={styles.badge + " " + styles.badgeNeutral}>{classification.category}</span>
+                  <span className={styles.badge + " " + styles.badgeNeutral}>Priorité : {classification.priority}</span>
+                  <span className={styles.badge + " " + styles.badgeNeutral}>Sentiment : {classification.sentiment}</span>
+                </div>
+                <p className={styles.meta}>Confiance : {Math.round(classification.confidence * 100)}%</p>
+                <div className={styles.confidenceBar}>
+                  <div
+                    className={styles.confidenceFill}
+                    style={{ width: `${Math.round(classification.confidence * 100)}%` }}
+                  />
+                </div>
               </section>
             )}
 
             {context && (
               <section className={styles.card}>
                 <h3>Contexte vérifié</h3>
-                <p>Client : {context.client.name} ({context.client.email})</p>
+                <p className={styles.meta}>Client : {context.client.name} ({context.client.email})</p>
                 {context.orders.length === 0 && <p>Aucune commande à problème trouvée.</p>}
                 {context.orders.map((order) => (
-                  <p key={order.order_number}>
-                    {order.order_number} — {order.status}
-                    {order.discrepancies.length > 0 ? ` — ${order.discrepancies.length} écart(s)` : " — conforme"}
-                  </p>
+                  <div key={order.order_number} className={styles.orderRow}>
+                    <span>{order.order_number} — {order.status}</span>
+                    <span>{order.discrepancies.length > 0 ? `${order.discrepancies.length} écart(s)` : "conforme"}</span>
+                  </div>
                 ))}
               </section>
             )}
@@ -231,17 +242,17 @@ export default function Home() {
                 <h3>Brouillon de réponse</h3>
                 <p className={styles.replyText}>{reply.reply_text}</p>
                 <h4>Actions à déclencher après validation</h4>
-                <ul>
+                <ul className={styles.actionsList}>
                   {reply.suggested_actions.map((action, i) => (
                     <li key={i}>{action}</li>
                   ))}
                 </ul>
 
                 {decision ? (
-                  <p className={styles.decision}>Décision enregistrée : {decision}</p>
+                  <p className={styles.decision}>✓ Décision enregistrée : {decision}</p>
                 ) : (
                   <div className={styles.actions}>
-                    <button onClick={() => recordDecision("Approuvé et envoyé", "approved")}>Approuver</button>
+                    <button className={styles.actionApprove} onClick={() => recordDecision("Approuvé et envoyé", "approved")}>Approuver</button>
                     <button onClick={() => recordDecision("Marqué à modifier", "modified")}>Modifier</button>
                     <button onClick={() => recordDecision("Rejeté", "rejected")}>Rejeter</button>
                     <button onClick={() => recordDecision("Transféré à un humain", "transferred")}>Transférer</button>
@@ -260,7 +271,19 @@ function PipelineStep({ label, status }: { label: string; status: StepStatus }) 
   const icon = { pending: "○", running: "…", done: "✓", skipped: "—", error: "✗" }[status];
   return (
     <p className={styles.pipelineStep} data-status={status}>
-      {icon} {label}
+      <span>{icon}</span> {label}
     </p>
   );
+}
+
+// Badge coloré par niveau de complexité : vert (auto) / orange (à valider) /
+// rouge (transfert humain) — le code couleur le plus parlant pour un humain
+// qui scanne rapidement plusieurs tickets.
+function LevelBadge({ level }: { level: 1 | 2 | 3 }) {
+  const config = {
+    1: { className: styles.badgeLevel1, text: "Niveau 1 — Réponse auto" },
+    2: { className: styles.badgeLevel2, text: "Niveau 2 — À valider" },
+    3: { className: styles.badgeLevel3, text: "Niveau 3 — Transfert humain" },
+  }[level];
+  return <span className={`${styles.badge} ${config.className}`}>{config.text}</span>;
 }

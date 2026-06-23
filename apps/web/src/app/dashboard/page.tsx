@@ -27,7 +27,7 @@ export default function Dashboard() {
     return (
       <div className={styles.page}>
         <Link href="/" className={styles.backLink}>← Retour à la boîte de réception</Link>
-        <h1>Tableau de bord ROI</h1>
+        <h1 className={styles.title}>Tableau de bord ROI</h1>
         <p className={styles.empty}>
           Aucune décision enregistrée encore. Traite quelques emails et clique sur
           Approuver/Modifier/Rejeter/Transférer pour générer des métriques réelles.
@@ -42,8 +42,8 @@ export default function Dashboard() {
   return (
     <div className={styles.page}>
       <Link href="/" className={styles.backLink}>← Retour à la boîte de réception</Link>
-      <h1>Tableau de bord ROI</h1>
-      <p>Métriques calculées à partir des décisions réellement prises dans l&apos;interface.</p>
+      <h1 className={styles.title}>Tableau de bord ROI</h1>
+      <p className={styles.subtitle}>Métriques calculées à partir des décisions réellement prises dans l&apos;interface.</p>
 
       <div className={styles.grid}>
         <div className={styles.metricCard}>
@@ -70,19 +70,22 @@ export default function Dashboard() {
 
       <div className={styles.breakdown}>
         <h2>Répartition par type de traitement</h2>
-        <div className={styles.breakdownRow}>
-          <span>Réponse automatique</span>
-          <span>{by_action.automatic_reply} ({pct(by_action.automatic_reply)}%)</span>
-        </div>
-        <div className={styles.breakdownRow}>
-          <span>Brouillon à valider</span>
-          <span>{by_action.draft_for_approval} ({pct(by_action.draft_for_approval)}%)</span>
-        </div>
-        <div className={styles.breakdownRow}>
-          <span>Transfert humain</span>
-          <span>{by_action.human_review} ({pct(by_action.human_review)}%)</span>
-        </div>
+        <BreakdownRow label="Réponse automatique" value={by_action.automatic_reply} pct={pct(by_action.automatic_reply)} color="var(--level-1)" />
+        <BreakdownRow label="Brouillon à valider" value={by_action.draft_for_approval} pct={pct(by_action.draft_for_approval)} color="var(--level-2)" />
+        <BreakdownRow label="Transfert humain" value={by_action.human_review} pct={pct(by_action.human_review)} color="var(--level-3)" />
       </div>
+    </div>
+  );
+}
+
+function BreakdownRow({ label, value, pct, color }: { label: string; value: number; pct: number; color: string }) {
+  return (
+    <div className={styles.breakdownRow}>
+      <span className={styles.breakdownLabel}>{label}</span>
+      <div className={styles.breakdownBarTrack}>
+        <div className={styles.breakdownBarFill} style={{ width: `${pct}%`, background: color }} />
+      </div>
+      <span className={styles.breakdownValue}>{value} ({pct}%)</span>
     </div>
   );
 }
