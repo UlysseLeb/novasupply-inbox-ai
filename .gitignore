@@ -42,3 +42,6 @@ next-env.d.ts
 # notes internes (mode mentor / instructions Claude), pas pour le dépôt public
 CLAUDE.md
 **/CLAUDE.md
+
+# données générées par l'usage réel de l'app (tableau de bord ROI), pas des données de démo figées
+/metrics.json

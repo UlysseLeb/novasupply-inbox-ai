@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 type Ticket = {
@@ -17,6 +18,7 @@ type Classification = {
   sentiment: string;
   automatic_reply_allowed: boolean;
   confidence: number;
+  cost_usd: number;
 };
 
 type RetrieveContext = {
@@ -27,7 +29,17 @@ type RetrieveContext = {
 type GeneratedReply = {
   reply_text: string;
   suggested_actions: string[];
+  cost_usd: number;
 };
+
+// Même règle que evaluations/run.mjs : on déduit l'action métier à partir
+// du niveau de complexité, pour alimenter le tableau de bord ROI avec
+// la même logique que celle utilisée pour évaluer la qualité du système.
+function deriveAction(complexityLevel: 1 | 2 | 3, automaticReplyAllowed: boolean) {
+  if (complexityLevel === 1 && automaticReplyAllowed) return "automatic_reply" as const;
+  if (complexityLevel === 3) return "human_review" as const;
+  return "draft_for_approval" as const;
+}
 
 // Étapes possibles du pipeline, affichées comme indicateurs de progression
 // pour que l'utilisateur voie QUELLES sources ont été utilisées — pas juste le résultat final.
@@ -52,6 +64,9 @@ export default function Home() {
   const [context, setContext] = useState<RetrieveContext | null>(null);
   const [reply, setReply] = useState<GeneratedReply | null>(null);
   const [decision, setDecision] = useState<string | null>(null);
+  // Coût réel cumulé pour le ticket en cours (classification + génération du
+  // brouillon) — c'est ce chiffre qu'on enverra à /api/metrics au moment de la décision.
+  const [totalCostUsd, setTotalCostUsd] = useState(0);
 
   useEffect(() => {
     fetch("/api/tickets")
@@ -65,6 +80,7 @@ export default function Home() {
     setClassification(null);
     setContext(null);
     setReply(null);
+    setTotalCostUsd(0);
     setSteps({ classify: "running", retrieve: "pending", generate: "pending" });
 
     // Étape 1 : toujours appelée, c'est elle qui décide du niveau de traitement.
@@ -79,6 +95,7 @@ export default function Home() {
     });
     const classificationResult: Classification = await classifyRes.json();
     setClassification(classificationResult);
+    setTotalCostUsd((c) => c + classificationResult.cost_usd);
     setSteps((s) => ({ ...s, classify: "done" }));
 
     // Étape 2 : uniquement pour les niveaux 2 et 3 (il y a une affirmation à
@@ -115,8 +132,27 @@ export default function Home() {
         context: contextResult,
       }),
     });
-    setReply(await replyRes.json());
+    const replyResult: GeneratedReply = await replyRes.json();
+    setReply(replyResult);
+    setTotalCostUsd((c) => c + replyResult.cost_usd);
     setSteps((s) => ({ ...s, generate: "done" }));
+  }
+
+  // Enregistre la décision réelle (clic humain) dans /api/metrics, pour le
+  // tableau de bord ROI — c'est le seul moment où on écrit une métrique.
+  function recordDecision(label: string, decisionKey: "approved" | "modified" | "rejected" | "transferred") {
+    setDecision(label);
+    if (!classification) return;
+    fetch("/api/metrics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        complexity_level: classification.complexity_level,
+        action: deriveAction(classification.complexity_level, classification.automatic_reply_allowed),
+        decision: decisionKey,
+        cost_usd: totalCostUsd,
+      }),
+    });
   }
 
   const selectedTicket = tickets.find((t) => t.id === selectedId) ?? null;
@@ -125,6 +161,7 @@ export default function Home() {
     <div className={styles.layout}>
       <aside className={styles.inbox}>
         <h1 className={styles.inboxTitle}>NovaSupply — Boîte de réception</h1>
+        <Link href="/dashboard" className={styles.dashboardLink}>Voir le tableau de bord ROI →</Link>
         <ul className={styles.ticketList}>
           {tickets.map((ticket) => (
             <li key={ticket.id}>
@@ -197,10 +234,10 @@ export default function Home() {
                   <p className={styles.decision}>Décision enregistrée : {decision}</p>
                 ) : (
                   <div className={styles.actions}>
-                    <button onClick={() => setDecision("Approuvé et envoyé")}>Approuver</button>
-                    <button onClick={() => setDecision("Marqué à modifier")}>Modifier</button>
-                    <button onClick={() => setDecision("Rejeté")}>Rejeter</button>
-                    <button onClick={() => setDecision("Transféré à un humain")}>Transférer</button>
+                    <button onClick={() => recordDecision("Approuvé et envoyé", "approved")}>Approuver</button>
+                    <button onClick={() => recordDecision("Marqué à modifier", "modified")}>Modifier</button>
+                    <button onClick={() => recordDecision("Rejeté", "rejected")}>Rejeter</button>
+                    <button onClick={() => recordDecision("Transféré à un humain", "transferred")}>Transférer</button>
                   </div>
                 )}
               </section>

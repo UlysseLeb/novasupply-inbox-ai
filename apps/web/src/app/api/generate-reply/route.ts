@@ -5,9 +5,10 @@
 // Entrée : { email_subject?, email_text, classification, context? }
 //   - classification : sortie de /classify-ticket (category, complexity_level, sentiment...)
 //   - context : sortie de /retrieve-context (client + orders), optionnel si pas de commande concernée
-// Sortie : { reply_text, suggested_actions: string[] }
+// Sortie : { reply_text, suggested_actions: string[], cost_usd }
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { computeHaikuCostUsd } from "@/lib/pricing";
 
 const client = new Anthropic();
 
@@ -66,5 +67,5 @@ export async function POST(request: NextRequest) {
   const textBlock = response.content.find((block) => block.type === "text");
   const draft = JSON.parse(textBlock!.text);
 
-  return NextResponse.json(draft);
+  return NextResponse.json({ ...draft, cost_usd: computeHaikuCostUsd(response.usage) });
 }

@@ -1,11 +1,12 @@
 // POST /api/classify-ticket
 // Rôle : lire un email client et décider quoi en faire.
 // Entrée : { email_subject?, email_text, sender_email? }
-// Sortie : { category, priority, complexity_level (1/2/3), sentiment, automatic_reply_allowed, confidence }
+// Sortie : { category, priority, complexity_level (1/2/3), sentiment, automatic_reply_allowed, confidence, cost_usd }
 // C'est la toute première étape du workflow : avant même de chercher des infos
 // ou de rédiger une réponse, on détermine le niveau de traitement nécessaire.
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { computeHaikuCostUsd } from "@/lib/pricing";
 
 // Client Anthropic : lit automatiquement ANTHROPIC_API_KEY dans .env.local,
 // pas besoin de la passer à la main (et donc pas de risque de la committer).
@@ -79,5 +80,7 @@ export async function POST(request: NextRequest) {
   const textBlock = response.content.find((block) => block.type === "text");
   const classification = JSON.parse(textBlock!.text);
 
-  return NextResponse.json(classification);
+  // cost_usd : coût réel de cet appel, calculé depuis les tokens réellement
+  // consommés (response.usage) — utilisé par le tableau de bord ROI.
+  return NextResponse.json({ ...classification, cost_usd: computeHaikuCostUsd(response.usage) });
 }
