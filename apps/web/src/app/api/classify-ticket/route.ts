@@ -1,3 +1,9 @@
+// POST /api/classify-ticket
+// Rôle : lire un email client et décider quoi en faire.
+// Entrée : { email_text, sender_email? }
+// Sortie : { category, priority, complexity_level (1/2/3), sentiment, automatic_reply_allowed, confidence }
+// C'est la toute première étape du workflow : avant même de chercher des infos
+// ou de rédiger une réponse, on détermine le niveau de traitement nécessaire.
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 

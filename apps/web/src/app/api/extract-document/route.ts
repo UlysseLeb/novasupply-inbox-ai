@@ -1,3 +1,9 @@
+// POST /api/extract-document
+// Rôle : lire un PDF (ex. bon de commande joint à un email) et en sortir les
+// données structurées qu'il contient — sans ça, l'IA ne peut comparer "ce que
+// le client dit avoir commandé" qu'avec un texte brut, pas avec de vraies données.
+// Entrée : multipart/form-data avec un champ "file" (le PDF)
+// Sortie : { order_number, customer, products: [{ reference, quantity }] }
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 

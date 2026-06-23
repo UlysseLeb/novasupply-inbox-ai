@@ -1,3 +1,11 @@
+// POST /api/retrieve-context
+// Rôle : vérifier dans les vraies données de NovaSupply ce qu'il en est réellement
+// (pas de confiance aveugle en ce que dit l'email ou le PDF). Permet de répondre
+// avec des faits vérifiés plutôt que de répéter ce que le client a affirmé.
+// Entrée : { order_number?, sender_email }
+//   - avec order_number : renvoie cette commande précise
+//   - sans order_number : renvoie uniquement les commandes à problème de ce client
+// Sortie : { client: { name, email }, orders: [{ order_number, status, discrepancies }] }
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { NextRequest, NextResponse } from "next/server";
