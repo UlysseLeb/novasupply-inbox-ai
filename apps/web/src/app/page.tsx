@@ -140,12 +140,18 @@ export default function Home() {
 
   // Enregistre la décision réelle (clic humain) dans /api/metrics, pour le
   // tableau de bord ROI — c'est le seul moment où on écrit une métrique.
-  function recordDecision(label: string, decisionKey: "approved" | "modified" | "rejected" | "transferred") {
-    setDecision(label);
+  // On ATTEND la fin de la requête avant d'afficher la confirmation : sinon,
+  // si l'utilisateur navigue ailleurs juste après son clic, le navigateur
+  // annule la requête en vol et la métrique est silencieusement perdue.
+  async function recordDecision(
+    label: string,
+    decisionKey: "approved" | "modified" | "rejected" | "transferred",
+  ) {
     if (!classification) return;
-    fetch("/api/metrics", {
+    await fetch("/api/metrics", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      keepalive: true,
       body: JSON.stringify({
         complexity_level: classification.complexity_level,
         action: deriveAction(classification.complexity_level, classification.automatic_reply_allowed),
@@ -153,6 +159,7 @@ export default function Home() {
         cost_usd: totalCostUsd,
       }),
     });
+    setDecision(label);
   }
 
   const selectedTicket = tickets.find((t) => t.id === selectedId) ?? null;
