@@ -82,6 +82,30 @@ Being upfront about what this is *not*:
 - **Classification isn't perfectly deterministic.** The same ambiguous email can occasionally be routed to a different level on re-evaluation (see Evaluation results above) — a known characteristic of LLM-based classification, not a bug to silently ignore.
 - **No authentication or multi-tenant support.** This is a single-operator demo, not a deployable SaaS.
 
+## n8n orchestration (real Gmail integration)
+
+Beyond the validation UI (which uses a static demo inbox), `n8n/email-workflow.json` is a real n8n workflow that connects to an actual Gmail account and runs the full pipeline automatically on incoming mail:
+
+```
+Gmail Trigger (new unread email)
+    → Get full message content
+    → POST /api/classify-ticket
+    → Switch (route by complexity_level)
+        ├─ Level 1 → POST /api/generate-reply
+        ├─ Level 2 → POST /api/retrieve-context → POST /api/generate-reply
+        └─ Level 3 → POST /api/generate-reply (no context lookup)
+```
+
+n8n calls the same four endpoints the validation UI uses — it doesn't reimplement any classification or business logic, it's purely an orchestrator. Verified end-to-end with a real Gmail inbox: a genuine "order CMD-2045 is missing items" test email was correctly classified as level 2, matched against the real order discrepancy in `demo-data/`, and produced a reply draft that cited the exact missing quantity.
+
+To run it:
+
+```bash
+docker compose up -d        # starts n8n on http://localhost:5678
+```
+
+Import `n8n/email-workflow.json`, connect your own Gmail OAuth credentials (Google Cloud Console → OAuth client, redirect URI `http://localhost:5678/rest/oauth2-credential/callback`), and point the HTTP Request nodes at `http://host.docker.internal:3000` (n8n runs in Docker; this resolves to your host machine where the Next.js app runs).
+
 ## Cost per operation
 
 Every classification and draft generation call returns the real cost, computed from actual token usage (not estimated): Claude Haiku 4.5 pricing is $1 / million input tokens and $5 / million output tokens. A typical classification call costs well under $0.001. The ROI dashboard aggregates this in real time as tickets are processed — there's no need to take a marketing number on faith; run it yourself and watch the dashboard update.
