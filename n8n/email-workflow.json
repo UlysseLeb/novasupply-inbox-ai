@@ -412,6 +412,78 @@
       ],
       "id": "0d0d9352-d89e-45a9-b501-fe942a29f446",
       "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Get a message').item.json.id }}",
+        "emailType": "text",
+        "message": "={{ $json.reply_text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1376,
+        -288
+      ],
+      "id": "f1a9b7e3-6c2e-4f3a-9b8a-7e1d4c2b9a01",
+      "name": "Send Reply Gmail",
+      "webhookId": "6ea0e3dc-31bc-42d7-8e76-add718f9afb1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MgfunORYYQnl0vdR",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ulysselebigre@gmail.com",
+        "subject": "=[A valider] Brouillon niveau 2 - {{ $('Edit Fields 2').item.json.email_subject }}",
+        "emailType": "text",
+        "message": "=Brouillon genere pour validation humaine avant envoi :\n\n{{ $json.reply_text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        -16
+      ],
+      "id": "b2c3d4e5-7f8a-4b1c-9d2e-3a4b5c6d7e8f",
+      "name": "Notify Human Level2",
+      "webhookId": "6ea0e3dc-31bc-42d7-8e76-add718f9afb1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MgfunORYYQnl0vdR",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ulysselebigre@gmail.com",
+        "subject": "=[Transfert humain] {{ $('Edit Fields 3').item.json.email_subject }}",
+        "emailType": "text",
+        "message": "=Ce mail necessite une intervention humaine directe (niveau 3) :\n\n{{ $('Edit Fields 3').item.json.email_text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1376,
+        176
+      ],
+      "id": "c3d4e5f6-8a9b-4c2d-9e3f-4b5c6d7e8f9a",
+      "name": "Notify Human Level3",
+      "webhookId": "6ea0e3dc-31bc-42d7-8e76-add718f9afb1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MgfunORYYQnl0vdR",
+          "name": "Gmail account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -485,11 +557,33 @@
         ]
       ]
     },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send Reply Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Edit Fields 3": {
       "main": [
         [
           {
             "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Notify Human Level3",
             "type": "main",
             "index": 0
           }
@@ -512,6 +606,17 @@
         [
           {
             "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Notify Human Level2",
             "type": "main",
             "index": 0
           }

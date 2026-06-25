@@ -84,5 +84,18 @@
       { "reference": "CAB-050", "quantity": 50 }
     ],
     "shipped_products": []
+  },
+  {
+    "order_number": "CMD-4006",
+    "client_id": "CLI-006",
+    "status": "livrée",
+    "ordered_products": [
+      { "reference": "CAP-100", "quantity": 10 },
+      { "reference": "MOD-220", "quantity": 3 }
+    ],
+    "shipped_products": [
+      { "reference": "CAP-100", "quantity": 7 },
+      { "reference": "MOD-220", "quantity": 3 }
+    ]
   }
 ]

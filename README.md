@@ -91,12 +91,12 @@ Gmail Trigger (new unread email)
     → Get full message content
     → POST /api/classify-ticket
     → Switch (route by complexity_level)
-        ├─ Level 1 → POST /api/generate-reply
-        ├─ Level 2 → POST /api/retrieve-context → POST /api/generate-reply
-        └─ Level 3 → POST /api/generate-reply (no context lookup)
+        ├─ Level 1 → POST /api/generate-reply → Gmail reply sent automatically to the customer
+        ├─ Level 2 → POST /api/retrieve-context → POST /api/generate-reply → Gmail notification to a human with the draft for approval (never auto-sent to the customer)
+        └─ Level 3 → POST /api/generate-reply (no context lookup) → Gmail notification to a human for direct handoff
 ```
 
-n8n calls the same four endpoints the validation UI uses — it doesn't reimplement any classification or business logic, it's purely an orchestrator. Verified end-to-end with a real Gmail inbox: a genuine "order CMD-2045 is missing items" test email was correctly classified as level 2, matched against the real order discrepancy in `demo-data/`, and produced a reply draft that cited the exact missing quantity.
+n8n calls the same four endpoints the validation UI uses — it doesn't reimplement any classification or business logic, it's purely an orchestrator. Verified end-to-end with a real Gmail inbox across all three levels: a password-reset email triggered an automatic reply sent directly to the customer (level 1); a genuine "order CMD-4006 is missing items" email was classified as level 2, matched against the real order discrepancy in `demo-data/`, and produced a reply draft delivered as a human-approval notification rather than sent to the customer; and a message threatening legal action was classified as level 3 and forwarded to a human with no draft sent to the customer.
 
 To run it:
 
