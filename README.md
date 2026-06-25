@@ -40,7 +40,7 @@ The model isn't trusted to make this call alone — `automatic_reply` is only al
 
 - **Frontend + backend**: Next.js 16 (App Router, TypeScript) — a single app serving both the API routes and the validation UI.
 - **AI model**: Claude Haiku 4.5 via the Anthropic API, with structured outputs (JSON schema) so every response is guaranteed parseable — no regex-scraping a chat response.
-- **Data**: a fictional company, *NovaSupply* (B2B industrial equipment), represented as JSON files (`demo-data/`) — clients, orders, invoices, catalog. No real database; this keeps the project runnable with zero setup beyond an API key.
+- **Data**: a fictional company, *NovaSupply* (B2B industrial equipment), represented as JSON files (`apps/web/demo-data/`) — clients, orders, invoices, catalog. No real database; this keeps the project runnable with zero setup beyond an API key.
 - **Endpoints**:
   - `POST /api/classify-ticket` — categorize an email and decide its handling level
   - `POST /api/extract-document` — read a PDF attachment (e.g. a purchase order) into structured JSON
@@ -67,7 +67,7 @@ This is the same principle the project is built around: let the model classify a
 
 ## Evaluation results
 
-`evaluations/tickets.json` holds 22 hand-written test cases (8 level-1, 8 level-2, 6 level-3) spanning password resets, incomplete orders, billing errors, legal threats, and ambiguous complaints. Running `npm run eval` against the live classification endpoint typically scores **95-100%** on both classification level and routing action, across repeated runs.
+`apps/web/evaluations/tickets.json` holds 22 hand-written test cases (8 level-1, 8 level-2, 6 level-3) spanning password resets, incomplete orders, billing errors, legal threats, and ambiguous complaints. Running `npm run eval` against the live classification endpoint typically scores **95-100%** on both classification level and routing action, across repeated runs.
 
 The recurring miss, when it happens, is the deliberately ambiguous case: *"I don't know exactly what the problem is, but something's wrong with my last order."* It's designed to be hard — there's no extractable detail — and the model occasionally classifies it as level 2 (draft for approval) instead of level 3 (human review). LLM classification isn't perfectly deterministic, so re-running `npm run eval` may show small variation between runs. This is the actual behavior, not a cherry-picked best run.
 

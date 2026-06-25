@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import styles from "./page.module.css";
 
@@ -168,9 +169,10 @@ export default function Home() {
     <div className={styles.layout}>
       <aside className={styles.inbox}>
         <div className={styles.inboxHeader}>
-          <h1 className={styles.inboxTitle}>NovaSupply</h1>
+          <div className={styles.brand}>
+            <Image src="/Nova_Supply_Logo.png" alt="NovaSupply" width={120} height={120} className={styles.logo} priority />
+          </div>
           <p className={styles.inboxSubtitle}>Boîte de réception — {tickets.length} emails</p>
-          <Link href="/dashboard" className={styles.dashboardLink}>📊 Tableau de bord ROI</Link>
         </div>
         <ul className={styles.ticketList}>
           {tickets.map((ticket) => (
@@ -188,10 +190,26 @@ export default function Home() {
       </aside>
 
       <main className={styles.detail}>
-        {!selectedTicket && <p className={styles.placeholder}>Sélectionne un email à gauche pour démarrer l&apos;analyse.</p>}
+        <div className={styles.detailTopBar}>
+          <Link href="/dashboard" className={styles.dashboardLink}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="5" y1="20" x2="5" y2="11" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="19" y1="20" x2="19" y2="14" />
+            </svg>
+            Tableau de bord ROI
+          </Link>
+        </div>
+
+        {!selectedTicket && (
+          <div className={styles.emptyState}>
+            <Image src="/Nova_Supply_Logo.png" alt="" width={440} height={440} className={styles.emptyStateLogo} aria-hidden />
+            <p className={styles.placeholder}>Sélectionne un email à gauche pour démarrer l&apos;analyse.</p>
+          </div>
+        )}
 
         {selectedTicket && (
-          <>
+          <div className={styles.content}>
             <section className={styles.originalEmail}>
               <h2>{selectedTicket.email_subject}</h2>
               <p className={styles.meta}>De : {selectedTicket.sender_email}</p>
@@ -260,7 +278,7 @@ export default function Home() {
                 )}
               </section>
             )}
-          </>
+          </div>
         )}
       </main>
     </div>

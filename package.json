@@ -2,6 +2,6 @@
   "name": "ai-customer-ops-workflow",
   "private": true,
   "scripts": {
-    "eval": "node evaluations/run.mjs"
+    "eval": "node apps/web/evaluations/run.mjs"
   }
 }

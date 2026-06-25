@@ -5,32 +5,8 @@
 // On n'enregistre une métrique QUE quand un humain a réellement pris une
 // décision — pas à chaque appel d'API — pour que le tableau de bord reflète
 // de l'usage réel, pas du bruit technique.
-import { readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { NextRequest, NextResponse } from "next/server";
-
-// metrics.json vit à la racine du projet : c'est de la donnée générée par
-// l'usage de l'app (pas une donnée de démo figée comme demo-data/), donc on
-// la garde hors de demo-data/ et hors du suivi git (voir .gitignore).
-const METRICS_PATH = path.join(process.cwd(), "..", "..", "metrics.json");
-
-type MetricRecord = {
-  complexity_level: 1 | 2 | 3;
-  action: "automatic_reply" | "draft_for_approval" | "human_review";
-  decision: "approved" | "modified" | "rejected" | "transferred";
-  cost_usd: number;
-  recorded_at: string;
-};
-
-async function loadRecords(): Promise<MetricRecord[]> {
-  try {
-    const raw = await readFile(METRICS_PATH, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    // Pas encore de fichier = pas encore de métrique enregistrée, pas une erreur.
-    return [];
-  }
-}
+import { appendRecord, loadRecords } from "@/lib/metrics-store";
 
 export async function GET() {
   const records = await loadRecords();
@@ -67,9 +43,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const records = await loadRecords();
-  records.push({ complexity_level, action, decision, cost_usd, recorded_at: new Date().toISOString() });
-  await writeFile(METRICS_PATH, JSON.stringify(records, null, 2));
+  await appendRecord({ complexity_level, action, decision, cost_usd, recorded_at: new Date().toISOString() });
 
   return NextResponse.json({ ok: true });
 }

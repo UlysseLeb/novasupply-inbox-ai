@@ -10,10 +10,11 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { NextRequest, NextResponse } from "next/server";
 
-// demo-data/ vit à la racine du projet (en dehors de apps/web), partagé entre
-// tous les services. Pas d'appel IA ici : c'est une vraie recherche dans nos
-// "fausses" données NovaSupply, pas une déduction du modèle.
-const DEMO_DATA_DIR = path.join(process.cwd(), "..", "..", "demo-data");
+// demo-data/ vit dans apps/web/ pour que Vercel l'inclue dans le déploiement
+// (le build ne packe que le répertoire racine du projet). Pas d'appel IA ici :
+// c'est une vraie recherche dans nos "fausses" données NovaSupply, pas une
+// déduction du modèle.
+const DEMO_DATA_DIR = path.join(process.cwd(), "demo-data");
 
 type Client = { client_id: string; name: string; email: string; city: string };
 type Order = {

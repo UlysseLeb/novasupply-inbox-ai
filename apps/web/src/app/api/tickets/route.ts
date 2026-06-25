@@ -6,7 +6,10 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
 
-const TICKETS_PATH = path.join(process.cwd(), "..", "..", "evaluations", "tickets.json");
+// Le dossier vit dans apps/web/ (pas à la racine du monorepo) pour que Vercel
+// l'inclue dans le déploiement : un build Vercel ne packe que le répertoire
+// racine du projet (ici apps/web), pas le reste du monorepo.
+const TICKETS_PATH = path.join(process.cwd(), "evaluations", "tickets.json");
 
 export async function GET() {
   const raw = await readFile(TICKETS_PATH, "utf-8");

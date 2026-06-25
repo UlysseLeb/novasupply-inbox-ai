@@ -7,8 +7,10 @@
   --foreground: #0f172a;
   --muted: #64748b;
   --border: #e2e8f0;
-  --accent: #4f46e5;
-  --accent-soft: #eef2ff;
+  /* Bleu et anthracite extraits du logo NovaSupply, pour que la charte de
+     l'app reflète la vraie marque plutôt qu'un bleu-violet générique. */
+  --accent: #1d5fa6;
+  --accent-soft: #eaf2fb;
 
   --level-1: #16a34a;
   --level-1-soft: #ecfdf3;
