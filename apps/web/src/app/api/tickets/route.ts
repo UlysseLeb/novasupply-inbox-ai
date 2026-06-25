@@ -22,6 +22,10 @@ export async function GET() {
     email_subject: ticket.email_subject,
     email_text: ticket.email,
     sender_email: ticket.sender_email,
+    // Présent uniquement sur les tickets de démo qui simulent une pièce jointe
+    // (bon de commande PDF) — undefined sinon, pour ne pas afficher le bouton
+    // d'extraction sur les emails qui n'ont pas de document à analyser.
+    attachment: ticket.attachment,
   }));
 
   return NextResponse.json(inbox);

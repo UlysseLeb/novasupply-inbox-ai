@@ -6,6 +6,7 @@
 // Sortie : { order_number, customer, products: [{ reference, quantity }] }
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { computeHaikuCostUsd } from "@/lib/pricing";
 
 // Même client que /classify-ticket : lit ANTHROPIC_API_KEY dans .env.local automatiquement.
 const client = new Anthropic();
@@ -75,5 +76,7 @@ export async function POST(request: NextRequest) {
   const textBlock = response.content.find((block) => block.type === "text");
   const extracted = JSON.parse(textBlock!.text);
 
-  return NextResponse.json(extracted);
+  // Même logique de coût que les autres endpoints : un chiffre réel pour le
+  // tableau de bord ROI, pas une estimation forfaitaire.
+  return NextResponse.json({ ...extracted, cost_usd: computeHaikuCostUsd(response.usage) });
 }

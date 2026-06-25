@@ -10,6 +10,16 @@ type Ticket = {
   email_subject: string;
   email_text: string;
   sender_email: string;
+  // Présent uniquement sur les tickets de démo qui simulent une pièce jointe
+  // (chemin public vers un PDF de bon de commande).
+  attachment?: string;
+};
+
+type ExtractedDocument = {
+  order_number: string;
+  customer: string;
+  products: { reference: string; quantity: number }[];
+  cost_usd: number;
 };
 
 type Classification = {
@@ -57,11 +67,13 @@ export default function Home() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [steps, setSteps] = useState<Record<string, StepStatus>>({
+    extract: "pending",
     classify: "pending",
     retrieve: "pending",
     generate: "pending",
   });
   const [classification, setClassification] = useState<Classification | null>(null);
+  const [extractedDocument, setExtractedDocument] = useState<ExtractedDocument | null>(null);
   const [context, setContext] = useState<RetrieveContext | null>(null);
   const [reply, setReply] = useState<GeneratedReply | null>(null);
   const [decision, setDecision] = useState<string | null>(null);
@@ -79,10 +91,35 @@ export default function Home() {
     setSelectedId(ticket.id);
     setDecision(null);
     setClassification(null);
+    setExtractedDocument(null);
     setContext(null);
     setReply(null);
     setTotalCostUsd(0);
-    setSteps({ classify: "running", retrieve: "pending", generate: "pending" });
+    setSteps({
+      extract: ticket.attachment ? "running" : "skipped",
+      classify: "pending",
+      retrieve: "pending",
+      generate: "pending",
+    });
+
+    // Étape 0 : uniquement si l'email a une pièce jointe (bon de commande PDF).
+    // On en extrait un numéro de commande fiable, plutôt que de dépendre d'un
+    // simple pattern-matching sur le texte de l'email.
+    let extractedOrderNumber: string | undefined;
+    if (ticket.attachment) {
+      const pdfRes = await fetch(ticket.attachment);
+      const pdfBlob = await pdfRes.blob();
+      const formData = new FormData();
+      formData.append("file", pdfBlob, "document.pdf");
+      const extractRes = await fetch("/api/extract-document", { method: "POST", body: formData });
+      const extractResult: ExtractedDocument = await extractRes.json();
+      setExtractedDocument(extractResult);
+      setTotalCostUsd((c) => c + extractResult.cost_usd);
+      extractedOrderNumber = extractResult.order_number;
+      setSteps((s) => ({ ...s, extract: "done" }));
+    }
+
+    setSteps((s) => ({ ...s, classify: "running" }));
 
     // Étape 1 : toujours appelée, c'est elle qui décide du niveau de traitement.
     const classifyRes = await fetch("/api/classify-ticket", {
@@ -108,7 +145,9 @@ export default function Home() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          order_number: extractOrderNumber(ticket.email_text),
+          // Priorité au numéro extrait du PDF (donnée vérifiée) sur le simple
+          // pattern-matching dans le texte de l'email (donnée déclarée par le client).
+          order_number: extractedOrderNumber ?? extractOrderNumber(ticket.email_text),
           sender_email: ticket.sender_email,
         }),
       });
@@ -214,13 +253,30 @@ export default function Home() {
               <h2>{selectedTicket.email_subject}</h2>
               <p className={styles.meta}>De : {selectedTicket.sender_email}</p>
               <p>{selectedTicket.email_text}</p>
+              {selectedTicket.attachment && (
+                <p className={styles.attachmentBadge}>📎 Bon de commande joint (PDF)</p>
+              )}
             </section>
 
             <section className={styles.pipeline}>
-              <PipelineStep label="1. Classification" status={steps.classify} />
-              <PipelineStep label="2. Vérification des données (retrieve-context)" status={steps.retrieve} />
-              <PipelineStep label="3. Génération du brouillon" status={steps.generate} />
+              <PipelineStep label="1. Extraction du document joint" status={steps.extract} />
+              <PipelineStep label="2. Classification" status={steps.classify} />
+              <PipelineStep label="3. Vérification des données (retrieve-context)" status={steps.retrieve} />
+              <PipelineStep label="4. Génération du brouillon" status={steps.generate} />
             </section>
+
+            {extractedDocument && (
+              <section className={styles.card}>
+                <h3>Document extrait</h3>
+                <p className={styles.meta}>Commande {extractedDocument.order_number} — Client : {extractedDocument.customer}</p>
+                {extractedDocument.products.map((product) => (
+                  <div key={product.reference} className={styles.orderRow}>
+                    <span>{product.reference}</span>
+                    <span>Quantité commandée : {product.quantity}</span>
+                  </div>
+                ))}
+              </section>
+            )}
 
             {classification && (
               <section className={styles.card}>

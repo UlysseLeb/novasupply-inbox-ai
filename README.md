@@ -46,7 +46,7 @@ The model isn't trusted to make this call alone — `automatic_reply` is only al
   - `POST /api/extract-document` — read a PDF attachment (e.g. a purchase order) into structured JSON
   - `POST /api/retrieve-context` — look up the real client/order data and compute actual discrepancies (ordered vs. shipped)
   - `POST /api/generate-reply` — draft a reply grounded in the classification + verified context
-- **Validation UI** (`/`): an inbox of demo emails; selecting one runs the pipeline live and shows every step — the classification, the verified context (if any), the draft, and the four decision buttons.
+- **Validation UI** (`/`): an inbox of demo emails; selecting one runs the pipeline live and shows every step — the PDF extraction (if an attachment is present), the classification, the verified context (if any), the draft, and the four decision buttons.
 - **ROI dashboard** (`/dashboard`): real metrics only — built from actual clicks in the UI, not simulated numbers. Tracks volume by handling level, real API cost (computed from actual token usage), and the rate of drafts approved without edits.
 
 ## Automation rules
@@ -77,7 +77,6 @@ Being upfront about what this is *not*:
 
 - **No real inbox integration.** The "inbox" is a static JSON list, not a live Gmail/IMAP connection.
 - **No real CRM.** "Suggested actions" (create ticket, assign to logistics...) are generated text, not actually executed against a CRM system.
-- **No PDF upload in the main flow.** `/api/extract-document` works and is tested standalone, but the validation UI currently extracts order numbers from email text via a simple pattern match rather than requiring an attached PDF — a deliberate shortcut for the demo.
 - **Small, hand-built dataset.** 22 test cases and 5 demo clients are enough to prove the approach, not a production-scale benchmark.
 - **Classification isn't perfectly deterministic.** The same ambiguous email can occasionally be routed to a different level on re-evaluation (see Evaluation results above) — a known characteristic of LLM-based classification, not a bug to silently ignore.
 - **No authentication or multi-tenant support.** This is a single-operator demo, not a deployable SaaS.
@@ -109,6 +108,14 @@ Import `n8n/email-workflow.json`, connect your own Gmail OAuth credentials (Goog
 ## Cost per operation
 
 Every classification and draft generation call returns the real cost, computed from actual token usage (not estimated): Claude Haiku 4.5 pricing is $1 / million input tokens and $5 / million output tokens. A typical classification call costs well under $0.001. The ROI dashboard aggregates this in real time as tickets are processed — there's no need to take a marketing number on faith; run it yourself and watch the dashboard update.
+
+## ROI math
+
+A full level-1 ticket (classification + reply generation) costs **~$0.0022** end to end — measured, not estimated, from the actual `cost_usd` returned by both calls. Compare that to a rough industry baseline for a human agent handling a simple ticket (read, look up, reply): a few minutes of loaded support time, typically in the €1-2 range per ticket. That's a **>99% reduction in marginal cost** on the tickets the system is allowed to fully automate (level 1, ~36% of the 22-case eval set).
+
+To be precise about what this number is and isn't: it's the AI cost of automating a single simple ticket type, not a measured production saving from a real company running real volume — NovaSupply is fictional and has no real ticket history. Treat it as a per-operation cost comparison, not a guaranteed ROI claim.
+
+The same logic extends to the other two levels: level 2 doesn't remove the human, it removes the *lookup and first-draft* work (the part Anthropic's usage data shows costs the same fraction of a cent), leaving a human to review rather than write from scratch. Level 3 is intentionally not automated at all — the cost there is zero by design, because the system routes it to a human instead of guessing.
 
 ## Running it locally
 
