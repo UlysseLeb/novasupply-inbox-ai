@@ -3,5 +3,6 @@
   { "client_id": "CLI-002", "name": "Martin Mécanique", "email": "contact@martin-mecanique.fr", "city": "Toulouse" },
   { "client_id": "CLI-003", "name": "Bernard Composants", "email": "contact@bernard-composants.fr", "city": "Nantes" },
   { "client_id": "CLI-004", "name": "Lefèvre Industrie", "email": "contact@lefevre-industrie.fr", "city": "Lille" },
-  { "client_id": "CLI-005", "name": "Petit Outillage", "email": "contact@petit-outillage.fr", "city": "Marseille" }
+  { "client_id": "CLI-005", "name": "Petit Outillage", "email": "contact@petit-outillage.fr", "city": "Marseille" },
+  { "client_id": "CLI-006", "name": "Ulysse Lebigre", "email": "ulysselebigre@gmail.com", "city": "Paris" }
 ]
