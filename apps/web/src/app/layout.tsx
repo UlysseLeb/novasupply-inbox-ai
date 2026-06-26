@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NovaSupply — Validation des emails clients",
+  title: "NovaSupply Inbox AI — Validation des emails clients",
   description: "Workflow IA de traitement des emails clients pour NovaSupply",
 };
 

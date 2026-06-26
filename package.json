@@ -1,5 +1,5 @@
 {
-  "name": "ai-customer-ops-workflow",
+  "name": "novasupply-inbox-ai",
   "private": true,
   "scripts": {
     "eval": "node apps/web/evaluations/run.mjs"

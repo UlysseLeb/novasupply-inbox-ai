@@ -1,4 +1,4 @@
-# AI Customer Operations Workflow
+# NovaSupply Inbox AI
 
 Production-ready AI workflow for email support, document extraction, context verification and human approval.
 
