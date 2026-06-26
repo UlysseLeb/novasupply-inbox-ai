@@ -40,11 +40,11 @@ The model isn't trusted to make this call alone — `automatic_reply` is only al
 
 - **Frontend + backend**: Next.js 16 (App Router, TypeScript) — a single app serving both the API routes and the validation UI.
 - **AI model**: Claude Haiku 4.5 via the Anthropic API, with structured outputs (JSON schema) so every response is guaranteed parseable — no regex-scraping a chat response.
-- **Data**: a fictional company, *NovaSupply* (B2B industrial equipment), represented as JSON files (`apps/web/demo-data/`) — clients, orders, invoices, catalog. No real database; this keeps the project runnable with zero setup beyond an API key.
+- **Data**: a fictional company, *NovaSupply* (B2B industrial equipment). Two sources, each kept in its natural role rather than forced into one: **HubSpot** (a real CRM, free-tier account) is the source of truth for the client and what they ordered (Contact + Deal + line items); `apps/web/demo-data/orders.json` plays the role of the warehouse/ERP system NovaSupply doesn't have, holding only what was actually shipped. A real CRM doesn't know what left the warehouse — that's a logistics system's job, so the demo doesn't pretend otherwise.
 - **Endpoints**:
   - `POST /api/classify-ticket` — categorize an email and decide its handling level
   - `POST /api/extract-document` — read a PDF attachment (e.g. a purchase order) into structured JSON
-  - `POST /api/retrieve-context` — look up the real client/order data and compute actual discrepancies (ordered vs. shipped)
+  - `POST /api/retrieve-context` — look up the client + their order in HubSpot (Contact → Deal → line items), cross-reference with the fulfillment data, and compute actual discrepancies (ordered vs. shipped)
   - `POST /api/generate-reply` — draft a reply grounded in the classification + verified context
 - **Validation UI** (`/`): an inbox of demo emails; selecting one runs the pipeline live and shows every step — the PDF extraction (if an attachment is present), the classification, the verified context (if any), the draft, and the four decision buttons.
 - **ROI dashboard** (`/dashboard`): real metrics only — built from actual clicks in the UI, not simulated numbers. Tracks volume by handling level, real API cost (computed from actual token usage), and the rate of drafts approved without edits.
@@ -76,8 +76,9 @@ The recurring miss, when it happens, is the deliberately ambiguous case: *"I don
 Being upfront about what this is *not*:
 
 - **No real inbox integration.** The "inbox" is a static JSON list, not a live Gmail/IMAP connection.
-- **No real CRM.** "Suggested actions" (create ticket, assign to logistics...) are generated text, not actually executed against a CRM system.
-- **Small, hand-built dataset.** 22 test cases and 5 demo clients are enough to prove the approach, not a production-scale benchmark.
+- **"Suggested actions" aren't executed.** They're generated text (create ticket, assign to logistics...), not actually written back to HubSpot — the CRM connection is currently read-only.
+- **Only one demo client is wired into HubSpot.** Dupont Industrie / CMD-2045 is set up end-to-end as a real Contact + Deal + line items; the other 4 demo clients still only exist in the (now unused for lookups) `clients.json`, so `/api/retrieve-context` returns a clean 404 for them rather than a fabricated answer.
+- **Small, hand-built dataset.** 22 test cases are enough to prove the approach, not a production-scale benchmark.
 - **Classification isn't perfectly deterministic.** The same ambiguous email can occasionally be routed to a different level on re-evaluation (see Evaluation results above) — a known characteristic of LLM-based classification, not a bug to silently ignore.
 - **No authentication or multi-tenant support.** This is a single-operator demo, not a deployable SaaS.
 
@@ -123,8 +124,11 @@ The same logic extends to the other two levels: level 2 doesn't remove the human
 cd apps/web
 npm install
 echo "ANTHROPIC_API_KEY=sk-ant-..." > .env.local
+echo "HUBSPOT_PRIVATE_APP_TOKEN=pat-..." >> .env.local
 npm run dev
 ```
+
+`HUBSPOT_PRIVATE_APP_TOKEN` comes from a free HubSpot account → Settings → Integrations → a "service key" / private app with `crm.objects.contacts.read`, `crm.objects.deals.read`, `crm.objects.deals.write` and `crm.objects.line_items.read` scopes.
 
 Open `http://localhost:3000`, click an email, watch the pipeline run.
 
