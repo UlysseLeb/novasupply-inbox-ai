@@ -35,7 +35,9 @@
         "operation": "get",
         "messageId": "={{ $json.id }}",
         "simple": false,
-        "options": {}
+        "options": {
+          "downloadAttachments": true
+        }
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
@@ -358,7 +360,7 @@
           "parameters": [
             {
               "name": "order_number",
-              "value": "={{ $json.email_text.match(/CMD-\\d+/)?.[0] }}"
+              "value": "={{ $json.extracted_order_number ?? $json.email_text.match(/CMD-\\d+/)?.[0] }}"
             },
             {
               "name": "sender_email",
@@ -484,6 +486,112 @@
           "name": "Gmail account"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d1e2f3a4-5b6c-4d7e-8f9a-0b1c2d3e4f5a",
+              "leftValue": "={{ Object.keys($binary || {}).length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        -16
+      ],
+      "id": "e1f2a3b4-6c7d-4e8f-9a0b-1c2d3e4f5a6b",
+      "name": "A une piece jointe ?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/api/extract-document",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "attachment_0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1024,
+        -160
+      ],
+      "id": "f2a3b4c5-7d8e-4f9a-0b1c-2d3e4f5a6b7c",
+      "name": "Extract Document"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c5d6e7f8-0a1b-4c2d-3e4f-5a6b7c8d9e0f",
+              "name": "email_subject",
+              "value": "={{ $('Edit Fields 2').item.json.email_subject }}",
+              "type": "string"
+            },
+            {
+              "id": "d6e7f8a9-1b2c-4d3e-4f5a-6b7c8d9e0f1a",
+              "name": "email_text",
+              "value": "={{ $('Edit Fields 2').item.json.email_text }}",
+              "type": "string"
+            },
+            {
+              "id": "e7f8a9b0-2c3d-4e4f-5a6b-7c8d9e0f1a2b",
+              "name": "classification",
+              "value": "={{ $('Edit Fields 2').item.json.classification }}",
+              "type": "object"
+            },
+            {
+              "id": "f8a9b0c1-3d4e-4f5a-6b7c-8d9e0f1a2b3c",
+              "name": "sender_email",
+              "value": "={{ $('Edit Fields 2').item.json.sender_email }}",
+              "type": "string"
+            },
+            {
+              "id": "a3b4c5d6-8e9f-4a0b-1c2d-3e4f5a6b7c8d",
+              "name": "extracted_order_number",
+              "value": "={{ $json.order_number }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        -288
+      ],
+      "id": "b4c5d6e7-9f0a-4b1c-2d3e-4f5a6b7c8d9e",
+      "name": "Fusionner numero extrait"
     }
   ],
   "pinData": {},
@@ -591,6 +699,46 @@
       ]
     },
     "Edit Fields 2": {
+      "main": [
+        [
+          {
+            "node": "A une piece jointe ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "A une piece jointe ?": {
+      "main": [
+        [
+          {
+            "node": "Extract Document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Document": {
+      "main": [
+        [
+          {
+            "node": "Fusionner numero extrait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fusionner numero extrait": {
       "main": [
         [
           {
