@@ -2,6 +2,8 @@
 
 Production-ready AI workflow for email support, document extraction, context verification and human approval.
 
+![Demo: full pipeline running on a real ticket](apps/web/public/demo-assets/demo.gif)
+
 ## The problem
 
 A B2B company selling industrial equipment receives a steady stream of customer emails: password resets, delivery questions, incomplete orders, billing disputes, legal threats. Every single one currently gets the same treatment — a human reads it, decides what it means, checks the order system, and writes a reply. Simple requests take just as long as complex ones to triage, because nothing pre-sorts them.
