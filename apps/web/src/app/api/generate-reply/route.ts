@@ -1,10 +1,14 @@
 // POST /api/generate-reply
 // Rôle : rédiger le brouillon de réponse au client, en se basant sur la
 // classification (/classify-ticket) ET les vraies données vérifiées
-// (/retrieve-context) — jamais uniquement sur ce que le client a écrit.
+// (/retrieve-context, et/ou /ask du chatbot documentaire) — jamais uniquement
+// sur ce que le client a écrit.
 // Entrée : { email_subject?, email_text, classification, context? }
 //   - classification : sortie de /classify-ticket (category, complexity_level, sentiment...)
-//   - context : sortie de /retrieve-context (client + orders), optionnel si pas de commande concernée
+//   - context.orders : sortie de /retrieve-context (client + commandes), optionnel si pas de commande concernée
+//   - context.doc_answer : sortie de /ask du chatbot documentaire (pme-rag-chatbot, namespace
+//     "novasupply"), optionnel — réponse sourcée pour les questions de type FAQ (niveau 1 :
+//     délais, moyens de paiement, garantie...) qui n'ont pas de commande associée
 // Sortie : { reply_text, suggested_actions: string[], cost_usd }
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
@@ -31,6 +35,9 @@ Règles :
 - Réponds toujours en français, ton professionnel et courtois, en vouvoyant le client.
 - Base-toi UNIQUEMENT sur les données vérifiées fournies (contexte), jamais sur de simples suppositions.
 - Si un écart de livraison est signalé dans le contexte, mentionne-le précisément (référence, quantité manquante).
+- Si une réponse documentaire (doc_answer) est fournie, appuie-toi dessus pour les questions de type FAQ
+  (délais, paiement, garantie, procédures...) — ne réponds pas à ces questions de mémoire si aucune
+  réponse documentaire n'est fournie ; indique plutôt qu'un humain va vérifier.
 - suggested_actions doit lister les actions internes à déclencher après validation humaine
   (ex. "créer un ticket CRM", "assigner à la logistique", "attacher le bon de commande").`;
 
