@@ -17,10 +17,7 @@
       },
       "type": "n8n-nodes-base.gmailTrigger",
       "typeVersion": 1.4,
-      "position": [
-        -144,
-        -16
-      ],
+      "position": [-144, -16],
       "id": "e380adb2-20b3-4dbe-a5b1-a7a79be888b1",
       "name": "Gmail Trigger",
       "credentials": {
@@ -41,10 +38,7 @@
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
-      "position": [
-        208,
-        -16
-      ],
+      "position": [208, -16],
       "id": "d244eb01-dbd5-4004-9fea-33f86f65e5e7",
       "name": "Get a message",
       "webhookId": "6ea0e3dc-31bc-42d7-8e76-add718f9afb1",
@@ -57,22 +51,46 @@
     },
     {
       "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d1e2f3a4-5b6c-4d7e-8f9a-0b1c2d3e4f5a",
+              "leftValue": "={{ Object.keys($binary || {}).length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [432, -16],
+      "id": "e1f2a3b4-6c7d-4e8f-9a0b-1c2d3e4f5a6b",
+      "name": "A une piece jointe ?"
+    },
+    {
+      "parameters": {
         "method": "POST",
-        "url": "http://host.docker.internal:3000/api/classify-ticket",
+        "url": "https://web-navy-five-20.vercel.app/api/extract-document",
         "sendBody": true,
+        "contentType": "multipart-form-data",
         "bodyParameters": {
           "parameters": [
             {
-              "name": "email_subject",
-              "value": "={{ $json.subject }}"
-            },
-            {
-              "name": "email_text",
-              "value": "={{ $json.text }}"
-            },
-            {
-              "name": "sender_email",
-              "value": "=\t{{ $json.from.value[0].address }}"
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "attachment_0"
             }
           ]
         },
@@ -80,10 +98,74 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [
-        416,
-        -16
-      ],
+      "position": [672, -160],
+      "id": "f2a3b4c5-7d8e-4f9a-0b1c-2d3e4f5a6b7c",
+      "name": "Extract Document"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a3b4c5d6-8e9f-4a0b-1c2d-3e4f5a6b7c8d",
+              "name": "extracted_order_number",
+              "value": "={{ $json.order_number }}",
+              "type": "string"
+            },
+            {
+              "id": "c5d6e7f8-0a1b-4c2d-3e4f-5a6b7c8d9e0f",
+              "name": "email_subject",
+              "value": "={{ $('Get a message').item.json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "d6e7f8a9-1b2c-4d3e-4f5a-6b7c8d9e0f1a",
+              "name": "email_text",
+              "value": "={{ $('Get a message').item.json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "f8a9b0c1-3d4e-4f5a-6b7c-8d9e0f1a2b3c",
+              "name": "sender_email",
+              "value": "={{ $('Get a message').item.json.from.value[0].address }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [896, -160],
+      "id": "b4c5d6e7-9f0a-4b1c-2d3e-4f5a6b7c8d9e",
+      "name": "Fusionner numero extrait"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://web-navy-five-20.vercel.app/api/classify-ticket",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email_subject",
+              "value": "={{ $('Get a message').item.json.subject }}"
+            },
+            {
+              "name": "email_text",
+              "value": "={{ $('Get a message').item.json.text }}"
+            },
+            {
+              "name": "sender_email",
+              "value": "={{ $('Get a message').item.json.from.value[0].address }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1120, -16],
       "id": "cbaf9c65-f149-4bdf-a7bd-ca393ca6e79f",
       "name": "HTTP Request1"
     },
@@ -137,7 +219,7 @@
                 "combinator": "and"
               },
               "renameOutput": true,
-              "outputKey": "=Niveau 2"
+              "outputKey": "Niveau 2"
             },
             {
               "conditions": {
@@ -169,10 +251,7 @@
       },
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
-      "position": [
-        640,
-        -32
-      ],
+      "position": [1344, -32],
       "id": "d8d7837f-4068-4cc3-ae5e-9e9a7990dfbf",
       "name": "Switch"
     },
@@ -204,17 +283,14 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [
-        816,
-        -288
-      ],
+      "position": [1568, -288],
       "id": "c99f6d58-ec79-410c-bce5-ea67fd6a75f0",
       "name": "Edit Fields"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "http://host.docker.internal:3000/api/generate-reply",
+        "url": "https://web-navy-five-20.vercel.app/api/generate-reply",
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
@@ -236,44 +312,30 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [
-        1072,
-        -288
-      ],
+      "position": [1792, -288],
       "id": "33a62648-16d4-472f-b1d4-de9950896d16",
       "name": "HTTP Request"
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "http://host.docker.internal:3000/api/generate-reply",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "email_subject",
-              "value": "={{ $json.email_subject }}"
-            },
-            {
-              "name": "email_text",
-              "value": "={{ $json.email_text }}"
-            },
-            {
-              "name": "classification",
-              "value": "={{ $json.classification }}"
-            }
-          ]
-        },
+        "operation": "reply",
+        "messageId": "={{ $('Get a message').item.json.id }}",
+        "emailType": "text",
+        "message": "={{ $json.reply_text }}",
         "options": {}
       },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1152,
-        176
-      ],
-      "id": "418f545f-f4e1-400e-a9eb-4b9395545d00",
-      "name": "HTTP Request2"
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [2016, -288],
+      "id": "f1a9b7e3-6c2e-4f3a-9b8a-7e1d4c2b9a01",
+      "name": "Send Reply Gmail",
+      "webhookId": "6ea0e3dc-31bc-42d7-8e76-add718f9afb1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MgfunORYYQnl0vdR",
+          "name": "Gmail account"
+        }
+      }
     },
     {
       "parameters": {
@@ -302,6 +364,12 @@
               "name": "sender_email",
               "value": "={{ $('Get a message').item.json.from.value[0].address }}",
               "type": "string"
+            },
+            {
+              "id": "9a0b1c2d-3e4f-5a6b-7c8d-9e0f1a2b3c4d",
+              "name": "extracted_order_number",
+              "value": "={{ $if($('Fusionner numero extrait').isExecuted, $('Fusionner numero extrait').item.json.extracted_order_number, null) }}",
+              "type": "string"
             }
           ]
         },
@@ -309,12 +377,88 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [
-        960,
-        -16
-      ],
+      "position": [1568, -16],
       "id": "90732d86-6c6f-4402-9df3-92e80072a3e9",
       "name": "Edit Fields 2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://web-navy-five-20.vercel.app/api/retrieve-context",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "order_number",
+              "value": "={{ $json.extracted_order_number ?? $json.email_text.match(/CMD-\\d+/)?.[0] }}"
+            },
+            {
+              "name": "sender_email",
+              "value": "={{ $json.sender_email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [1792, -16],
+      "id": "9c3281fb-9823-43e4-b187-d4a51c9f784f",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://web-navy-five-20.vercel.app/api/generate-reply",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email_subject",
+              "value": "={{ $('Edit Fields 2').item.json.email_subject }}"
+            },
+            {
+              "name": "email_text",
+              "value": "={{ $('Edit Fields 2').item.json.email_text }}"
+            },
+            {
+              "name": "classification",
+              "value": "={{ $('Edit Fields 2').item.json.classification }}"
+            },
+            {
+              "name": "context",
+              "value": "={{ $json }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [2016, -16],
+      "id": "0d0d9352-d89e-45a9-b501-fe942a29f446",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "sendTo": "ulysselebigre@gmail.com",
+        "subject": "=[A valider] Brouillon niveau 2 - {{ $('Edit Fields 2').item.json.email_subject }}",
+        "emailType": "text",
+        "message": "=Brouillon genere pour validation humaine avant envoi :\n\n{{ $json.reply_text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [2240, -16],
+      "id": "b2c3d4e5-7f8a-4b1c-9d2e-3a4b5c6d7e8f",
+      "name": "Notify Human Level2",
+      "webhookId": "6ea0e3dc-31bc-42d7-8e76-add718f9afb1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "MgfunORYYQnl0vdR",
+          "name": "Gmail account"
+        }
+      }
     },
     {
       "parameters": {
@@ -344,63 +488,28 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [
-        896,
-        208
-      ],
+      "position": [1568, 208],
       "id": "a2fb01d0-380e-4631-88df-d2843392a6ed",
       "name": "Edit Fields 3"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "http://host.docker.internal:3000/api/retrieve-context",
-        "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "order_number",
-              "value": "={{ $json.extracted_order_number ?? $json.email_text.match(/CMD-\\d+/)?.[0] }}"
-            },
-            {
-              "name": "sender_email",
-              "value": "={{ $json.sender_email }}"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1168,
-        -16
-      ],
-      "id": "9c3281fb-9823-43e4-b187-d4a51c9f784f",
-      "name": "HTTP Request3"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://host.docker.internal:3000/api/generate-reply",
+        "url": "https://web-navy-five-20.vercel.app/api/generate-reply",
         "sendBody": true,
         "bodyParameters": {
           "parameters": [
             {
               "name": "email_subject",
-              "value": "={{ $('Edit Fields 2').item.json.email_subject }}"
+              "value": "={{ $json.email_subject }}"
             },
             {
               "name": "email_text",
-              "value": "={{ $('Edit Fields 2').item.json.email_text }}"
+              "value": "={{ $json.email_text }}"
             },
             {
               "name": "classification",
-              "value": "={{ $('Edit Fields 2').item.json.classification }}"
-            },
-            {
-              "name": "context",
-              "value": "={{ $json }}"
+              "value": "={{ $json.classification }}"
             }
           ]
         },
@@ -408,60 +517,9 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
-      "position": [
-        1376,
-        -16
-      ],
-      "id": "0d0d9352-d89e-45a9-b501-fe942a29f446",
-      "name": "HTTP Request4"
-    },
-    {
-      "parameters": {
-        "operation": "reply",
-        "messageId": "={{ $('Get a message').item.json.id }}",
-        "emailType": "text",
-        "message": "={{ $json.reply_text }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        1376,
-        -288
-      ],
-      "id": "f1a9b7e3-6c2e-4f3a-9b8a-7e1d4c2b9a01",
-      "name": "Send Reply Gmail",
-      "webhookId": "6ea0e3dc-31bc-42d7-8e76-add718f9afb1",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "MgfunORYYQnl0vdR",
-          "name": "Gmail account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "sendTo": "ulysselebigre@gmail.com",
-        "subject": "=[A valider] Brouillon niveau 2 - {{ $('Edit Fields 2').item.json.email_subject }}",
-        "emailType": "text",
-        "message": "=Brouillon genere pour validation humaine avant envoi :\n\n{{ $json.reply_text }}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
-      "position": [
-        1600,
-        -16
-      ],
-      "id": "b2c3d4e5-7f8a-4b1c-9d2e-3a4b5c6d7e8f",
-      "name": "Notify Human Level2",
-      "webhookId": "6ea0e3dc-31bc-42d7-8e76-add718f9afb1",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "MgfunORYYQnl0vdR",
-          "name": "Gmail account"
-        }
-      }
+      "position": [1792, 208],
+      "id": "418f545f-f4e1-400e-a9eb-4b9395545d00",
+      "name": "HTTP Request2"
     },
     {
       "parameters": {
@@ -473,10 +531,7 @@
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
-      "position": [
-        1376,
-        176
-      ],
+      "position": [2016, 208],
       "id": "c3d4e5f6-8a9b-4c2d-9e3f-4b5c6d7e8f9a",
       "name": "Notify Human Level3",
       "webhookId": "6ea0e3dc-31bc-42d7-8e76-add718f9afb1",
@@ -486,290 +541,58 @@
           "name": "Gmail account"
         }
       }
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true,
-            "leftValue": "",
-            "typeValidation": "strict",
-            "version": 3
-          },
-          "conditions": [
-            {
-              "id": "d1e2f3a4-5b6c-4d7e-8f9a-0b1c2d3e4f5a",
-              "leftValue": "={{ Object.keys($binary || {}).length }}",
-              "rightValue": 0,
-              "operator": {
-                "type": "number",
-                "operation": "gt"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        1024,
-        -16
-      ],
-      "id": "e1f2a3b4-6c7d-4e8f-9a0b-1c2d3e4f5a6b",
-      "name": "A une piece jointe ?"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://host.docker.internal:3000/api/extract-document",
-        "sendBody": true,
-        "contentType": "multipart-form-data",
-        "bodyParameters": {
-          "parameters": [
-            {
-              "parameterType": "formBinaryData",
-              "name": "file",
-              "inputDataFieldName": "attachment_0"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
-      "position": [
-        1024,
-        -160
-      ],
-      "id": "f2a3b4c5-7d8e-4f9a-0b1c-2d3e4f5a6b7c",
-      "name": "Extract Document"
-    },
-    {
-      "parameters": {
-        "assignments": {
-          "assignments": [
-            {
-              "id": "c5d6e7f8-0a1b-4c2d-3e4f-5a6b7c8d9e0f",
-              "name": "email_subject",
-              "value": "={{ $('Edit Fields 2').item.json.email_subject }}",
-              "type": "string"
-            },
-            {
-              "id": "d6e7f8a9-1b2c-4d3e-4f5a-6b7c8d9e0f1a",
-              "name": "email_text",
-              "value": "={{ $('Edit Fields 2').item.json.email_text }}",
-              "type": "string"
-            },
-            {
-              "id": "e7f8a9b0-2c3d-4e4f-5a6b-7c8d9e0f1a2b",
-              "name": "classification",
-              "value": "={{ $('Edit Fields 2').item.json.classification }}",
-              "type": "object"
-            },
-            {
-              "id": "f8a9b0c1-3d4e-4f5a-6b7c-8d9e0f1a2b3c",
-              "name": "sender_email",
-              "value": "={{ $('Edit Fields 2').item.json.sender_email }}",
-              "type": "string"
-            },
-            {
-              "id": "a3b4c5d6-8e9f-4a0b-1c2d-3e4f5a6b7c8d",
-              "name": "extracted_order_number",
-              "value": "={{ $json.order_number }}",
-              "type": "string"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
-      "position": [
-        1024,
-        -288
-      ],
-      "id": "b4c5d6e7-9f0a-4b1c-2d3e-4f5a6b7c8d9e",
-      "name": "Fusionner numero extrait"
     }
   ],
   "pinData": {},
   "connections": {
     "Gmail Trigger": {
-      "main": [
-        [
-          {
-            "node": "Get a message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Get a message", "type": "main", "index": 0}]]
     },
     "Get a message": {
-      "main": [
-        [
-          {
-            "node": "HTTP Request1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "HTTP Request1": {
-      "main": [
-        [
-          {
-            "node": "Switch",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Switch": {
-      "main": [
-        [
-          {
-            "node": "Edit Fields",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Edit Fields 2",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Edit Fields 3",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Edit Fields": {
-      "main": [
-        [
-          {
-            "node": "HTTP Request",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "HTTP Request": {
-      "main": [
-        [
-          {
-            "node": "Send Reply Gmail",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Edit Fields 3": {
-      "main": [
-        [
-          {
-            "node": "HTTP Request2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "HTTP Request2": {
-      "main": [
-        [
-          {
-            "node": "Notify Human Level3",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Edit Fields 2": {
-      "main": [
-        [
-          {
-            "node": "A une piece jointe ?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "A une piece jointe ?", "type": "main", "index": 0}]]
     },
     "A une piece jointe ?": {
       "main": [
-        [
-          {
-            "node": "Extract Document",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "HTTP Request3",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{"node": "Extract Document", "type": "main", "index": 0}],
+        [{"node": "HTTP Request1", "type": "main", "index": 0}]
       ]
     },
     "Extract Document": {
-      "main": [
-        [
-          {
-            "node": "Fusionner numero extrait",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Fusionner numero extrait", "type": "main", "index": 0}]]
     },
     "Fusionner numero extrait": {
+      "main": [[{"node": "HTTP Request1", "type": "main", "index": 0}]]
+    },
+    "HTTP Request1": {
+      "main": [[{"node": "Switch", "type": "main", "index": 0}]]
+    },
+    "Switch": {
       "main": [
-        [
-          {
-            "node": "HTTP Request3",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{"node": "Edit Fields", "type": "main", "index": 0}],
+        [{"node": "Edit Fields 2", "type": "main", "index": 0}],
+        [{"node": "Edit Fields 3", "type": "main", "index": 0}]
       ]
+    },
+    "Edit Fields": {
+      "main": [[{"node": "HTTP Request", "type": "main", "index": 0}]]
+    },
+    "HTTP Request": {
+      "main": [[{"node": "Send Reply Gmail", "type": "main", "index": 0}]]
+    },
+    "Edit Fields 2": {
+      "main": [[{"node": "HTTP Request3", "type": "main", "index": 0}]]
     },
     "HTTP Request3": {
-      "main": [
-        [
-          {
-            "node": "HTTP Request4",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "HTTP Request4", "type": "main", "index": 0}]]
     },
     "HTTP Request4": {
-      "main": [
-        [
-          {
-            "node": "Notify Human Level2",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Notify Human Level2", "type": "main", "index": 0}]]
+    },
+    "Edit Fields 3": {
+      "main": [[{"node": "HTTP Request2", "type": "main", "index": 0}]]
+    },
+    "HTTP Request2": {
+      "main": [[{"node": "Notify Human Level3", "type": "main", "index": 0}]]
     }
   },
   "active": false,
