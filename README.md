@@ -6,7 +6,7 @@ Production-ready AI workflow for email support, document extraction, context ver
 
 ## The problem
 
-A B2B company selling industrial equipment receives a steady stream of customer emails: password resets, delivery questions, incomplete orders, billing disputes, legal threats. Every single one currently gets the same treatment — a human reads it, decides what it means, checks the order system, and writes a reply. Simple requests take just as long as complex ones to triage, because nothing pre-sorts them.
+*NovaSupply* is a fictional B2B distributor of industrial automation components — pressure sensors, valves, cables, electronic control modules — sold to manufacturing SMEs (a garage, a workshop, a factory ordering parts for their equipment). It receives a steady stream of customer emails: password resets, delivery questions, incomplete orders ("I ordered 10 pressure sensors and 3 control modules, only the sensors arrived"), billing disputes, legal threats. Every single one currently gets the same treatment — a human reads it, decides what it means, checks the order system, and writes a reply. Simple requests take just as long as complex ones to triage, because nothing pre-sorts them.
 
 This project automates that triage and drafting step — without removing the human from decisions that matter.
 
@@ -42,7 +42,7 @@ The model isn't trusted to make this call alone — `automatic_reply` is only al
 
 - **Frontend + backend**: Next.js 16 (App Router, TypeScript) — a single app serving both the API routes and the validation UI.
 - **AI model**: Claude Haiku 4.5 via the Anthropic API, with structured outputs (JSON schema) so every response is guaranteed parseable — no regex-scraping a chat response.
-- **Data**: a fictional company, *NovaSupply* (B2B industrial equipment). Two sources, each kept in its natural role rather than forced into one: **HubSpot** (a real CRM, free-tier account) is the source of truth for the client and what they ordered (Contact + Deal + line items); `apps/web/demo-data/orders.json` plays the role of the warehouse/ERP system NovaSupply doesn't have, holding only what was actually shipped. A real CRM doesn't know what left the warehouse — that's a logistics system's job, so the demo doesn't pretend otherwise.
+- **Data**: *NovaSupply* (see "The problem" above for what it actually sells). Two sources, each kept in its natural role rather than forced into one: **HubSpot** (a real CRM, free-tier account) is the source of truth for the client and what they ordered (Contact + Deal + line items); `apps/web/demo-data/orders.json` plays the role of the warehouse/ERP system NovaSupply doesn't have, holding only what was actually shipped. A real CRM doesn't know what left the warehouse — that's a logistics system's job, so the demo doesn't pretend otherwise.
 - **Endpoints**:
   - `POST /api/classify-ticket` — categorize an email and decide its handling level
   - `POST /api/extract-document` — read a PDF attachment (e.g. a purchase order) into structured JSON

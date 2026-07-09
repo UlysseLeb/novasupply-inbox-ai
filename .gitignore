@@ -43,5 +43,8 @@ next-env.d.ts
 CLAUDE.md
 **/CLAUDE.md
 
+# config/outils Claude Code personnels (hooks voix, etc.), pas pour le dépôt public
+.claude/
+
 # données générées par l'usage réel de l'app (tableau de bord ROI), pas des données de démo figées
 /metrics.json
