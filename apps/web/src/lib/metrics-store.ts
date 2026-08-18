@@ -43,15 +43,27 @@ async function loadFromFile(): Promise<MetricRecord[]> {
 
 export async function loadRecords(): Promise<MetricRecord[]> {
   if (redis) {
-    return redis.lrange<MetricRecord>(METRICS_KEY, 0, -1);
+    try {
+      return await redis.lrange<MetricRecord>(METRICS_KEY, 0, -1);
+    } catch {
+      // Upstash injoignable (ex. base supprimée pour inactivité sur le plan
+      // gratuit) : on retombe sur le fichier local plutôt que de faire
+      // planter le tableau de bord — un dashboard vide vaut mieux qu'un 500.
+      return loadFromFile();
+    }
   }
   return loadFromFile();
 }
 
 export async function appendRecord(record: MetricRecord): Promise<void> {
   if (redis) {
-    await redis.rpush(METRICS_KEY, record);
-    return;
+    try {
+      await redis.rpush(METRICS_KEY, record);
+      return;
+    } catch {
+      // Même repli qu'au-dessus : on ne bloque pas la décision humaine
+      // (Approve/Modify/Reject/Transfer) si Upstash est indisponible.
+    }
   }
   const records = await loadFromFile();
   records.push(record);
