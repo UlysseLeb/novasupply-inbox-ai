@@ -1,0 +1,13 @@
+services:
+  # UI + API Next.js, déployée sur le VPS pour l'entretien Seven Mile.
+  # Même patron Traefik que pme-rag-chatbot et odoo-iniwave sur ce VPS.
+  web:
+    build: ./apps/web
+    restart: unless-stopped
+    env_file: .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.novasupply.rule=Host(`novasupply.luluplug.com`)"
+      - "traefik.http.routers.novasupply.entrypoints=websecure"
+      - "traefik.http.routers.novasupply.tls.certresolver=letsencrypt"
+      - "traefik.http.services.novasupply.loadbalancer.server.port=3000"
