@@ -7,7 +7,7 @@ services:
     env_file: .env
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.novasupply.rule=Host(`novasupply.luluplug.com`)"
+      - "traefik.http.routers.novasupply.rule=Host(`nova-supply.luluplug.com`)"
       - "traefik.http.routers.novasupply.entrypoints=websecure"
       - "traefik.http.routers.novasupply.tls.certresolver=letsencrypt"
       - "traefik.http.services.novasupply.loadbalancer.server.port=3000"
