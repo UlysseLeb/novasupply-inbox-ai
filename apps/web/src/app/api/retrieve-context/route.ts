@@ -26,8 +26,8 @@ type FulfillmentRecord = {
   shipped_products: { reference: string; quantity: number }[];
 };
 
-type Product = { reference: string; quantity: number };
-type Discrepancy = { reference: string; ordered: number; shipped: number; missing_quantity: number };
+type Product = { reference: string; product_name: string; quantity: number };
+type Discrepancy = { reference: string; product_name: string; ordered: number; shipped: number; missing_quantity: number };
 type Deal = { order_number: string; ordered_products: Product[] };
 
 // Petit wrapper pour ne pas répéter l'en-tête d'authentification à chaque appel.
@@ -88,6 +88,7 @@ async function getDealWithLineItems(dealId: number): Promise<Deal | null> {
       .filter((item) => item !== null)
       .map((item) => ({
         reference: extractReference(item.properties.name),
+        product_name: item.properties.name,
         quantity: Number(item.properties.quantity),
       })),
   };
@@ -113,6 +114,7 @@ function computeDiscrepancies(orderedProducts: Product[], shippedProducts: Produ
     if (shippedQuantity < orderedItem.quantity) {
       discrepancies.push({
         reference: orderedItem.reference,
+        product_name: orderedItem.product_name,
         ordered: orderedItem.quantity,
         shipped: shippedQuantity,
         missing_quantity: orderedItem.quantity - shippedQuantity,
