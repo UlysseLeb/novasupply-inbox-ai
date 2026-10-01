@@ -102,7 +102,11 @@ async function loadFulfillmentRecords(): Promise<FulfillmentRecord[]> {
 // Compare commandé (HubSpot) vs expédié (notre faux ERP) référence par référence :
 // c'est ce calcul qui permet de répondre "il manque 2 unités de CAP-100" au lieu
 // de juste renvoyer les deux listes brutes au modèle de génération de réponse.
-function computeDiscrepancies(orderedProducts: Product[], shippedProducts: Product[], status: string): Discrepancy[] {
+function computeDiscrepancies(
+  orderedProducts: Product[],
+  shippedProducts: { reference: string; quantity: number }[],
+  status: string,
+): Discrepancy[] {
   // Une commande "en cours" ou "en préparation" n'a normalement pas encore tout
   // expédié — ce n'est un vrai écart que si la commande est censée être complète.
   if (status !== "livrée") return [];
